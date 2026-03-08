@@ -1,0 +1,56 @@
+import { getPostById } from "@/lib/post"
+import { notFound } from "next/navigation"
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
+import Image from "next/image"
+import { format } from 'date-fns'
+import { ja } from 'date-fns/locale'
+
+type Params = {
+    params: Promise<{ id: string }>
+}
+
+export default async function PostPage({ params }: Params) {
+    const { id } = await params
+    const post = await getPostById(id)
+
+    if (post == null) {
+        notFound()
+    }
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <Card className="max-w-3xl mx-auto">
+                {post.topImage && (
+                    <div className="relative w-full h-64 lg:h-96">
+                        <Image
+                            src={post.topImage}
+                            sizes="100vw"
+                            alt={post.title}
+                            fill
+                            className="rounded-t-md object-cover"
+                            priority
+                        />
+                    </div>
+                )}
+                <CardHeader>
+                    <div className="flex justify-between items-center mb-4">
+                        <p className="text-sm text-gray-500">
+                            投稿者: {post.author.name}
+                        </p>
+                    </div>
+                    <time className="text-sm text-gray-500">
+                        {format(new Date(post.createdAt), 'yyyy年MM月dd日', { locale: ja })}
+                    </time>
+                    <CardTitle className="text-3xl font-bold">
+                        {post.title}
+                    </CardTitle>
+                </CardHeader>
+            </Card>
+        </div>
+    )
+}
